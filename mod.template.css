@@ -1,0 +1,41 @@
+/* ── Clawd crab states ─────────────────────────────────────────────
+   Hooks verified against T3 Code nightly source (2026-11-17):
+   data-timeline-row-kind, data-sidebar-row + aria-label status text,
+   data-v2-item-type, data-pending-user-input-toggle, lucide-* tool icons,
+   .live-tool-shine (active tool), .live-activity-focus (compacting shimmer).
+   :where() keeps specificity at 0 so later rules win by order. */
+
+/* 1 ─ Composer mascot: mirrors the open thread */
+:where(body){--cr:clawd-rest;--cn:var(--clawd-idle)}
+:where(body:has([data-timeline-row-kind=working],[data-sidebar-row][aria-current=page]:is([aria-label*=", Working"],[aria-label*=", Goal"],[aria-label*=", Setting up"]))){--cr:none;--cn:var(--clawd-working)}
+:where(body:has([data-timeline-row-kind=thinking],[data-timeline-row-kind=work-live] .lucide-brain)){--cr:none;--cn:var(--clawd-thinking)}
+:where(body:has([data-timeline-row-kind=work-live] :is(.lucide-eye,.lucide-search,.lucide-globe))){--cr:none;--cn:var(--clawd-reading)}
+:where(body:has([data-v2-item-type=subagent]:is([aria-description=Running],[aria-description=Queued]),[data-timeline-row-kind=work-live] .lucide-bot)){--cr:none;--cn:var(--clawd-delegating)}
+:where(body:has([data-timeline-row-kind=working] .live-activity-focus)){--cr:none;--cn:var(--clawd-compacting)}
+:where(body:has([data-v2-item-type=approval_request],[data-pending-user-input-toggle],[data-sidebar-row][aria-current=page]:is([aria-label*=", Approval"],[aria-label*=", Input"],[aria-label*=", Waiting"],[aria-label*=", Request"]))){--cr:none;--cn:var(--clawd-waiting)}
+:where(body:has([data-sidebar-row][aria-current=page]:is([aria-label*=", Failed"],[aria-label*=", Limited"]))){--cr:none;--cn:var(--clawd-error)}
+
+[data-chat-composer-form]{position:relative}
+[data-chat-composer-form]::before{content:"";position:absolute;z-index:2;right:20px;bottom:calc(100% - 8px);width:99px;height:72px;pointer-events:none;background:var(--cn) center/contain no-repeat;
+  /* resting: celebrate ~3s after a turn ends, idle, then nap after ~2.5 min */
+  animation:clawd-rest 150s linear forwards;animation-name:var(--cr)}
+@keyframes clawd-rest{0%,1.5%{background-image:var(--clawd-done)}3%,99%{background-image:var(--clawd-idle)}100%{background-image:var(--clawd-sleeping)}}
+
+/* 2 ─ Tiny crab beside "Working for 12s" in the chat */
+[data-timeline-row-kind=working]{display:flex;align-items:center;gap:6px}
+[data-timeline-row-kind=working]>*{flex:1;min-width:0}
+[data-timeline-row-kind=working]::before{content:"";flex:none;width:42px;height:30px;margin:-10px 0 -4px;background:var(--clawd-working) center/contain no-repeat}
+[data-timeline-row-kind=working]:has(.live-activity-focus)::before{background-image:var(--clawd-compacting)}
+
+/* 2b ─ A scuttling mini crab beside each running subagent in the chat */
+[data-v2-item-type=subagent]:is([aria-description=Running],[aria-description=Queued])::before{content:"";flex:none;width:27px;height:17px;background:var(--clawd-subagent) center/contain no-repeat}
+
+/* 3 ─ Sidebar: a crab per thread status (hidden on hover so actions stay clickable) */
+[data-sidebar-row]{position:relative}
+[data-sidebar-row]::after{content:"";position:absolute;right:4px;top:50%;translate:0 -50%;width:30px;height:22px;pointer-events:none;background:var(--cs,none) center/contain no-repeat;transition:opacity .12s}
+[data-sidebar-row]:hover::after{opacity:0}
+:where([data-sidebar-row]:is([aria-label*=", Working"],[aria-label*=", Goal"],[aria-label*=", Setting up"])){--cs:var(--clawd-working)}
+:where([data-sidebar-row]:is([aria-label*=", Approval"],[aria-label*=", Input"],[aria-label*=", Waiting"],[aria-label*=", Request"])){--cs:var(--clawd-waiting)}
+:where([data-sidebar-row]:is([aria-label*=", Failed"],[aria-label*=", Limited"])){--cs:var(--clawd-error)}
+:where([data-sidebar-row][aria-label*=", Done"]){--cs:var(--clawd-done)}
+:where([data-sidebar-row][aria-label*=", Woke"]){--cs:var(--clawd-sleeping)}

@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clawd State Sprites</title>
+<style>
+:root{
+  --bg:#191919; --panel:#1f1f1f; --line:#2c2c2c; --text:#EFEFF0; --dim:#8b8b8b;
+  --accent:#D97757; --err:#E5644E; --warn:#E0A458; --ok:#7FB77E;
+  --mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.5}
+.wrap{max-width:1040px;margin:0 auto;padding:28px 16px 48px}
+header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:15px;font-weight:600;margin:0;color:var(--accent)}
+h1 span{color:var(--text)}
+header p{margin:0;color:var(--dim)}
+
+.stage{border:1px solid var(--line);border-radius:10px;background:var(--panel);overflow:hidden}
+.stage-top{display:flex;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.chip{font:inherit;font-size:12px;color:var(--dim);background:transparent;border:1px solid var(--line);border-radius:999px;padding:3px 10px;cursor:pointer}
+.chip:hover{color:var(--text)}
+.chip[aria-pressed=true]{color:var(--bg);background:var(--accent);border-color:var(--accent)}
+.hero{display:grid;place-items:center;padding:28px 16px 8px}
+.hero img{width:min(432px,100%);height:auto;image-rendering:pixelated}
+.term{padding:12px 16px 16px;border-top:1px dashed var(--line);min-height:92px;white-space:pre-wrap}
+.term .a{color:var(--accent)} .term .e{color:var(--err)} .term .w{color:var(--warn)} .term .g{color:var(--ok)} .term .d{color:var(--dim)}
+
+h2{font-size:12px;font-weight:500;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin:28px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:10px 12px 12px;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.card:hover,.card[aria-current=true]{border-color:var(--accent)}
+.card img{display:block;width:100%;height:auto;background:#151515;border-radius:6px;margin-bottom:8px}
+.card b{font-weight:600}
+.card small{display:block;color:var(--dim);font-size:11.5px;margin-top:2px}
+.sizes{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--panel)}
+.sizes figure{margin:0;text-align:center;color:var(--dim);font-size:11px}
+.sizes img{display:block;height:auto}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>✻ Clawd <span>state sprites</span></h1>
+    <p>Pixel Clawd for each state an agent can be in. Each sprite is one tiny SVG with its animation built in.</p>
+  </header>
+
+  <section class="stage">
+    <div class="stage-top" id="chips"></div>
+    <div class="hero" id="hero"></div>
+    <div class="term" id="term"></div>
+  </section>
+
+  <h2>All states</h2>
+  <div class="grid" id="grid"></div>
+
+  <h2>At UI sizes</h2>
+  <div class="sizes" id="sizes"></div>
+</div>
+<script>
+const STATES = /*STATES*/[];
+const VERBS = ["Scuttling","Pinching","Clawculating","Molting","Sidestepping","Tide-pooling","Beachcombing","Burrowing","Crabulating","Snipping","Shell-scripting","Bubbling"];
+const GLYPHS = ["·","✢","✳","✶","✻","✽","✻","✶","✳","✢"];
+let t0 = Date.now(), tick = 0, current = "delegating";
+
+function status(id){
+  const s = Math.floor((Date.now()-t0)/1000);
+  const g = GLYPHS[tick % GLYPHS.length];
+  const v = VERBS[Math.floor(tick/18) % VERBS.length];
+  const tok = (1.2 + s*0.07).toFixed(1);
+  switch(id){
+    case "idle": return `<span class="d">╭──────────────────────────────────────╮
+│</span> &gt; <span class="d">Try "pinch the flaky test in auth.spec.ts"</span>
+<span class="d">╰──────────────────────────────────────╯
+  ? for shortcuts</span>`;
+    case "thinking": return `<span class="a">${g} ${v}…</span> <span class="d">(${s}s · esc to interrupt)</span>`;
+    case "working": return `<span class="a">⏺</span> Update(<b>src/claws.ts</b>)
+  <span class="d">⎿</span>  Updated src/claws.ts with <span class="g">12 additions</span> and <span class="e">3 removals</span>
+<span class="a">${g} ${v}…</span> <span class="d">(${s}s · ↑ ${tok}k tokens · esc to interrupt)</span>`;
+    case "reading": return `<span class="a">⏺</span> Search(pattern: "<b>molt</b>", path: "src")
+  <span class="d">⎿</span>  Found 7 files
+<span class="a">⏺</span> Read(<b>src/shell/molt.ts</b>)
+  <span class="d">⎿</span>  Read 214 lines`;
+    case "waiting": return `<span class="w">Do you want to make this edit to claws.ts?</span>
+<span class="a">❯ 1. Yes</span>
+  2. Yes, and don't ask again this session
+  3. No, and tell Clawd what to do differently <span class="d">(esc)</span>`;
+    case "error": return `<span class="a">⏺</span> Bash(<b>npm test</b>)
+  <span class="d">⎿</span>  <span class="e">Error: Exit code 1</span>
+     <span class="e">✗ claws › should pinch (expected 2 claws, got 3)</span>`;
+    case "done": return `<span class="a">⏺</span> All 48 tests pass. The pinch handler now debounces correctly.
+<span class="d">  ⎿  Done in ${s}s · 3 files changed</span>`;
+    case "sleeping": return `<span class="d">idle for ${12 + Math.floor(s/60)}m · Clawd is resting in a tide pool</span>
+<span class="d">&gt; _</span>`;
+    case "delegating": return `<span class="a">⏺</span> Task(<b>Deploy 4 subagents</b>)
+  <span class="d">⎿</span>  <span class="a">▪</span> auth-tests     <span class="a">Running</span> <span class="d">· ${s}s</span>
+     <span class="a">▪</span> docs-sweep     <span class="a">Running</span> <span class="d">· ${Math.max(0, s - 1)}s</span>
+     <span class="a">▪</span> perf-probe     <span class="g">Completed</span>
+<span class="a">${g} Herding crabs…</span> <span class="d">(${s}s · esc to interrupt)</span>`;
+    case "subagent": return `<span class="d">  ⎿</span>  <span class="a">auth-tests</span> · Running <span class="d">· reading src/auth/*.ts</span>`;
+    case "compacting": return `<span class="a">${g} Compacting conversation…</span> <span class="d">(${s}s)</span>
+<span class="d">  ⎿  Squeezing 182k tokens into a shell-sized summary</span>`;
+  }
+  return "";
+}
+
+const $ = (id) => document.getElementById(id);
+function select(id){
+  current = id; t0 = Date.now();
+  const s = STATES.find(x => x.id === id);
+  $("hero").innerHTML = `<img src="${s.uri}" alt="Clawd: ${s.title}">`;
+  document.querySelectorAll(".chip").forEach(c => c.setAttribute("aria-pressed", c.dataset.id === id));
+  document.querySelectorAll(".card").forEach(c => c.setAttribute("aria-current", c.dataset.id === id));
+  $("term").innerHTML = status(id);
+}
+
+STATES.forEach(s => {
+  const chip = document.createElement("button");
+  chip.className = "chip"; chip.dataset.id = s.id; chip.textContent = s.title;
+  chip.onclick = () => select(s.id);
+  $("chips").append(chip);
+
+  const card = document.createElement("button");
+  card.className = "card"; card.dataset.id = s.id;
+  card.innerHTML = `<img src="${s.uri}" alt=""><b>${s.title}</b><small>${s.blurb}</small><small>clawd-${s.id}.svg</small>`;
+  card.onclick = () => { select(s.id); window.scrollTo({top:0, behavior:"smooth"}); };
+  $("grid").append(card);
+});
+
+[["working",18],["thinking",36],["waiting",54],["error",72],["done",108]].forEach(([id,w]) => {
+  const f = document.createElement("figure");
+  f.innerHTML = `<img src="${STATES.find(x=>x.id===id).uri}" alt="">${w}px`;
+  f.querySelector("img").style.width = w + "px";
+  $("sizes").append(f);
+});
+
+select(current);
+setInterval(() => { tick++; $("term").innerHTML = status(current); }, 120);
+</script>
+</body>
+</html>

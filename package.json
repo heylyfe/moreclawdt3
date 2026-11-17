@@ -1,0 +1,16 @@
+{
+  "name": "moreclawdt3",
+  "version": "1.0.0-beta.1",
+  "private": true,
+  "description": "Animated Clawd crab states for the t3-clawd theme in T3 Code",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node --test test/theme.test.mjs test/browser.test.mjs",
+    "preview": "node test/mock-page.mjs"
+  }
+}
