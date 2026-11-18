@@ -1,10 +1,21 @@
 # Clawd Crab for T3 Code
 
+<p align="center"><img src="media/banner.png" alt="Clawd Crab: an animated pixel Clawd for every agent state in T3 Code" width="100%"></p>
+
+<p align="center">
+  <a href="https://github.com/heylyfe/moreclawdt3/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/heylyfe/moreclawdt3?include_prereleases&label=release&color=D97757"></a>
+  <a href="https://github.com/heylyfe/moreclawdt3/actions/workflows/test.yml"><img alt="Tests" src="https://img.shields.io/github/actions/workflow/status/heylyfe/moreclawdt3/test.yml?branch=main&label=tests"></a>
+  <img alt="Theme size" src="https://img.shields.io/badge/theme_css-47k%20%2F%20100k-7FB77E">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-blue"></a>
+</p>
+
 Animated pixel Clawd for [T3 Code](https://github.com/pingdotgg/t3code). It plays a different animation for each state your agent is in.
 
 Built on top of **[t3-clawd](https://github.com/rohit3a/t3-clawd) by [@rohit3a](https://github.com/rohit3a)**. That theme gives T3 Code its Claude Code look, and this repo adds the crab. It's still Claude Code, just crab-themed. 🟧
 
-> **v1 beta.** It has only been tested against T3 Code's source and in a headless browser that copies its DOM, not in a long session in the real app yet. If a crab ends up in the wrong place, please [open an issue](../../issues) with a screenshot.
+> **Beta.** It's tested against T3 Code's source and in a headless browser that copies T3 Code's page structure, but hasn't had much use in the real app yet. If a crab ends up in the wrong place, please [open an issue](../../issues/new/choose) with a screenshot.
+
+**Contents:** [The crabs](#the-crabs) · [Where they show up](#where-they-show-up) · [Install](#how-to-install) · [Troubleshooting](#troubleshooting) · [Make it your own](#make-it-your-own) · [How it works](#how-it-works) · [Credits](#credits) · [Changelog](CHANGELOG.md)
 
 ## The crabs
 
@@ -46,7 +57,12 @@ This publishes the theme as `t3-clawd-crab` and makes it the default for this ma
 
 ### Updating
 
-To update, download the new `t3-clawd-crab.json` and add it the same way. It replaces the old one.
+Download the new `t3-clawd-crab.json` and add it the same way. T3 Code will say it's **Already installed**; click **Update existing**. See the [changelog](CHANGELOG.md) for what changed.
+
+### Uninstalling
+
+- **In the app:** Settings → Appearance, pick another theme, then use **Remove theme** on Clawd Crab.
+- **From the terminal:** run `t3 theme clear`.
 
 ### Only want the sprites?
 
@@ -57,6 +73,17 @@ To update, download the new `t3-clawd-crab.json` and add it the same way. It rep
 ```
 
 [`clawd/clawd-mod.css`](clawd/clawd-mod.css) adds the rules that place the crabs, without the t3-clawd styling.
+
+## Troubleshooting
+
+| Problem | Fix |
+| --- | --- |
+| The theme won't import, or says the CSS is too long | You need a T3 Code nightly from 14 Nov 2026 or later. Older builds cap theme CSS at 20,000 characters. |
+| The Claude look works but there are no crabs | Make sure **Clawd Crab** is selected, not the original **T3 Clawd**. |
+| A crab shows the wrong state or sits in the wrong spot | A T3 Code update probably changed the page. [Open an issue](../../issues/new/choose) with your T3 Code version and a screenshot. |
+| The crabs don't move | Your system is set to reduce motion, and the crabs respect that. |
+| The sidebar crabs never show | Sidebar crabs match English status words (Working, Waiting and so on), so they don't show in other languages. |
+| The big crab covers something | Change its size or position in [`mod.template.css`](mod.template.css), then `npm run build` (see below). |
 
 ## Make it your own
 
@@ -77,9 +104,17 @@ npm run preview  # writes mock-preview.html, a fake T3 Code with every state
 
 Want a bigger crab? Change the `width`/`height` in `mod.template.css` (keep the mascot at about 0.72 × its width), then run `npm run build`.
 
+### Contributing
+
+Ideas for new crabs are very welcome, so [suggest one](../../issues/new/choose). For a PR: change `build.mjs` or `mod.template.css`, run `npm run build` and `npm test`, commit the generated files, and add a line to [CHANGELOG.md](CHANGELOG.md).
+
+### Releasing
+
+Bump `version` in `package.json`, add its section to `CHANGELOG.md`, run `npm run build`, commit, then push a tag such as `v1.0.0`. The [release workflow](.github/workflows/release.yml) runs the tests and publishes the release with `t3-clawd-crab.json`, the gallery, a sprites zip and checksums attached. Tags with a `-` (like `-beta.3`) become pre-releases.
+
 ## Tests
 
-`npm test` runs 40 checks with Node's built-in test runner. There's nothing to install.
+`npm test` runs these checks with Node's built-in test runner. There's nothing to install.
 
 - **Theme file:** matches T3 Code's theme schema (name, colors, the 100k CSS limit), using rules copied from T3 Code's source.
 - **No stripped styles:** T3 Code's own fetch filter (copied into `test/t3/`) accepts every sprite, and the CSS loads no remote files.

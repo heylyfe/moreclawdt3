@@ -2,7 +2,23 @@
   "name": "moreclawdt3",
   "version": "1.0.0-beta.2",
   "private": true,
-  "description": "Animated Clawd crab states for the t3-clawd theme in T3 Code",
+  "description": "Clawd Crab: an animated pixel Clawd for every agent state in T3 Code, built on the t3-clawd theme",
+  "keywords": [
+    "t3code",
+    "t3-code",
+    "theme",
+    "clawd",
+    "claude-code",
+    "pixel-art",
+    "svg",
+    "css"
+  ],
+  "homepage": "https://github.com/heylyfe/moreclawdt3#readme",
+  "bugs": "https://github.com/heylyfe/moreclawdt3/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heylyfe/moreclawdt3.git"
+  },
   "type": "module",
   "license": "MIT",
   "engines": {

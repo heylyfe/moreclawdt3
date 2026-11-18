@@ -1,0 +1,42 @@
+name: 🐛 Crab in the wrong place
+description: A crab shows the wrong state, sits in the wrong spot, or doesn't show at all.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks! A screenshot is the most useful thing here. T3 Code updates can move things around, so the version matters too.
+  - type: input
+    id: t3-version
+    attributes:
+      label: T3 Code version
+      description: Shown in Settings, or run `t3 --version`.
+      placeholder: 0.1.10-nightly.20261118
+    validations:
+      required: true
+  - type: input
+    id: theme-version
+    attributes:
+      label: Clawd Crab version
+      description: The release you installed. The gallery page shows it too.
+      placeholder: v1.0.0-beta.2
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Where
+      options: [Desktop app (macOS), Desktop app (Windows), Desktop app (Linux), Web]
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      placeholder: While the agent ran `npm test`, the big crab kept typing instead of showing the terminal crab.
+    validations:
+      required: true
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot
+      description: Drag an image in. If you can, include the chat row the agent was on.

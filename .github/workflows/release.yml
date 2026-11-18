@@ -1,0 +1,66 @@
+name: release
+
+# Push a tag like v1.0.0 or v1.0.0-beta.3 to publish a release.
+# Tags with a "-" (betas, release candidates) become pre-releases.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Tag matches package.json
+        run: |
+          v="$(node -p "require('./package.json').version")"
+          if [ "v$v" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match package.json version $v"; exit 1
+          fi
+
+      - name: Run tests (theme checks + headless Chrome)
+        run: npm test
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+
+      - name: Package assets
+        run: |
+          mkdir -p dist
+          cp t3-clawd-crab.json clawd-gallery.html dist/
+          (cd clawd && zip -q -9 ../dist/clawd-sprites.zip *.svg clawd-theme.css clawd-mod.css ../LICENSE ../vendor/LICENSE)
+          (cd dist && sha256sum t3-clawd-crab.json clawd-gallery.html clawd-sprites.zip > SHA256SUMS.txt)
+
+      - name: Release notes from CHANGELOG.md
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk -v h="## [$v]" 'index($0,h)==1{on=1;next} /^## \[/{on=0} on' CHANGELOG.md > notes.md
+          cat >> notes.md <<'EOF'
+
+          ### Install
+          1. Download **`t3-clawd-crab.json`** below.
+          2. In T3 Code: **Settings → Appearance → Add a theme**, then drop the file in.
+          3. Pick **Clawd Crab**.
+
+          Or from a terminal: `t3 theme set ./t3-clawd-crab.json`. Needs T3 Code nightly from 14 Nov 2026 or later.
+          EOF
+          test -s notes.md
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=""
+          case "$GITHUB_REF_NAME" in *-*) flags="--prerelease";; *) flags="--latest";; esac
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+            gh release edit "$GITHUB_REF_NAME" --notes-file notes.md $flags
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* --title "Clawd Crab $GITHUB_REF_NAME" --notes-file notes.md $flags
+          fi

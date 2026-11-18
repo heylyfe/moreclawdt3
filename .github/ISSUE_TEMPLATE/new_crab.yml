@@ -1,0 +1,16 @@
+name: 🦀 Idea for a crab
+description: A new state, animation, or place for a crab to show up.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      placeholder: A crab that pops a party hat when a PR gets merged.
+    validations:
+      required: true
+  - type: textarea
+    id: when
+    attributes:
+      label: When should it show?
+      description: What is the agent or the app doing at that moment? Themes can only react to things visible in the page.

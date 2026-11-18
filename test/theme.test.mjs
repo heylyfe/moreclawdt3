@@ -85,10 +85,30 @@ test('each SVG is small, self-contained and safe to embed', () => {
   }
 });
 
+test('the version has a changelog entry and shows in the gallery', () => {
+  const { version } = JSON.parse(read('package.json'));
+  assert.match(version, /^\d+\.\d+\.\d+(-[a-z]+\.\d+)?$/);
+  assert.ok(read('CHANGELOG.md').includes(`## [${version}]`), `CHANGELOG.md has no entry for ${version}`);
+  assert.ok(read('clawd-gallery.html').includes(`v${version}`));
+});
+
+test('the README shows every crab', () => {
+  const readme = read('README.md');
+  for (const id of STATES) assert.ok(readme.includes(`clawd/clawd-${id}.svg`), `README is missing ${id}`);
+});
+
+test('the README size badge and install note match the theme size', () => {
+  const readme = read('README.md');
+  const k = Math.round(theme.css.length / 1000);
+  assert.ok(readme.includes(`theme_css-${k}k%20%2F%20100k`), `update the README badge to ${k}k`);
+  const approx = (Math.round(theme.css.length / 100) * 100).toLocaleString('en');
+  assert.ok(readme.includes(`about ${approx}`), `update "about ${approx}" in the README`);
+});
+
 test('committed files match a fresh build', () => {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'clawd-build-'));
   try {
-    const src = ['build.mjs', 'mod.template.css', 'gallery.template.html', 'vendor/t3-clawd.json'];
+    const src = ['build.mjs', 'package.json', 'mod.template.css', 'gallery.template.html', 'vendor/t3-clawd.json'];
     for (const f of src) {
       fs.mkdirSync(path.dirname(path.join(tmp, f)), { recursive: true });
       fs.copyFileSync(path.join(ROOT, f), path.join(tmp, f));

@@ -122,7 +122,7 @@ add('idle', 'Idle', 'Ready for a prompt. Breathes, blinks.',
 
 {
   const mag = `<g class='m'>${P(R(5, 2, 3, 3), { f: C.blue, s: 'opacity:.35' })}${P(B(G.ring, 4, 1) + R(9, 6, 1, 1), { f: C.ink })}${P(R(10, 7, 1, 1) + R(11, 8, 1, 1), { f: '#3a3a3a' })}</g>`;
-  add('reading', 'Reading / searching', 'Magnifier sweeps the files (Read, Grep, Glob, web).',
+  add('reading', 'Reading / searching', 'Magnifier sweeps the files (Read, Grep, Glob).',
     crab({ upper: mag }),
     `.m{animation:M 3s steps(6) infinite}@keyframes M{50%{${tx(12)}}}` +
     `.e{animation:F 3s steps(2) infinite}@keyframes F{0%,100%{${tx(-1)}}50%{${tx(1)}}}.r{${ty(1)}}`);
@@ -290,7 +290,8 @@ fs.writeFileSync(path.join(OUT, 'clawd-theme.css'), css);
 
 const tmpl = fs.readFileSync(path.resolve('gallery.template.html'), 'utf8');
 const data = states.map(({ id, title, blurb, uri }) => ({ id, title, blurb, uri }));
-fs.writeFileSync(path.resolve('clawd-gallery.html'), tmpl.replace('/*STATES*/[]', JSON.stringify(data)));
+const { version } = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf8'));
+fs.writeFileSync(path.resolve('clawd-gallery.html'), tmpl.replace('/*STATES*/[]', JSON.stringify(data)).replaceAll('%VERSION%', version));
 
 // ---------- mod CSS + merged theme ----------
 const minify = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\s*\n\s*/g, '').replace(/\s*([{};])\s*/g, '$1').replace(/;}/g, '}');

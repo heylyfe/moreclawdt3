@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Issue with the base t3-clawd look (colors, sidebar, header)
+    url: https://github.com/rohit3a/t3-clawd/issues
+    about: The Claude Code styling comes from rohit3a/t3-clawd. Report it there if it also happens without the crabs.
