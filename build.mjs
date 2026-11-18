@@ -11,7 +11,7 @@ fs.mkdirSync(OUT, { recursive: true });
 
 const C = {
   fur: '#D97757', err: '#E5644E', warn: '#E0A458', eye: '#111',
-  ink: '#eee', grey: '#888', key: '#333', keyTop: '#666', blue: '#6af',
+  ink: '#eee', grey: '#888', key: '#333', keyTop: '#666', blue: '#6af', ok: '#7FB77E',
 };
 // canvas: 36x26, crab (24x15) at origin; viewBox offset does the centering
 const VIEWBOX = '-6 -9 36 26';
@@ -49,6 +49,10 @@ const G = {
   rb:    ['##.', '.#.', '..#', '.#.', '##.'],
   sl:    ['..#', '..#', '.#.', '#..', '#..'],
   drop:  ['.#.', '###', '###', '.#.'],
+  gt:    ['#..', '.#.', '#..'],
+  check: ['..#', '#.#', '.#.'],
+  globe: ['.###.', '#.#.#', '#####', '#.#.#', '.###.'],
+  globe2:['.###.', '##.##', '#####', '##.##', '.###.'],
 };
 
 // ---------- the crab ----------
@@ -195,10 +199,80 @@ add('waiting', 'Waiting on you', 'Needs approval or an answer. Waves, holds up a
     kf('Q', 'scaleX(.75)') + `@keyframes N{40%,60%{transform:scaleY(.2)}85%{opacity:0}}`);
 }
 
+// ---------- v1 beta 2: more crabs ----------
+// One-shot reveal: hidden, then shown from `on`% until `off`% of the loop.
+const reveal = (name, on, off = 92) => `@keyframes ${name}{0%{opacity:0}${on}%{opacity:1}${off}%{opacity:0}}`;
+
+// TERMINAL (Bash tool): types a command into a tiny shell, output appears
+{
+  const chars = [0, 1, 2, 3, 4].map((i) => P(R(6 + 2 * i, -7, 1, 3), { c: `t t${i}`, f: C.ink })).join('');
+  const term = P(R(1, -9, 22, 8), { f: '#555' }) + P(R(2, -8, 20, 6), { f: '#111' }) +
+    P(B(G.gt, 3, -7), { f: C.ok }) + chars +
+    P(R(3, -3, 14, 1), { c: 't t5', f: C.grey }) + P(R(17, -5, 2, 1), { c: 'k', f: C.ink });
+  add('terminal', 'Running a command', 'Bash tool: taps out a command, output scrolls in.',
+    crab({ eyes: 'up', back: term }),
+    bob(1.3) +
+    `.l,.r{animation:p .4s steps(1) infinite}.r{animation-delay:-.2s}@keyframes p{50%{${ty(-1)}}}` +
+    `.t{animation:T0 2.6s steps(1) infinite}` + [1, 2, 3, 4, 5].map((i) => `.t${i}{animation-name:T${i}}`).join('') +
+    [8, 18, 28, 38, 48, 62].map((on, i) => reveal(`T${i}`, on)).join('') +
+    `.k{animation:K .6s steps(1) infinite}@keyframes K{50%{opacity:0}}`);
+}
+
+// EDITING (Edit/Write tools): snips the old line out, a new green one appears
+{
+  const old = `<g class='o'>${P(R(1, -6, 3, 1) + R(5, -6, 15, 1), { f: C.err })}</g>`;
+  const neu = `<g class='n'>${P(R(1, -3, 3, 1) + R(2, -4, 1, 3) + R(5, -3, 12, 1), { f: C.ok })}</g>`;
+  add('editing', 'Snipping code', 'Edit tool: snips out the old line, a new one grows in.',
+    crab({ eyes: 'up', back: old + neu + P(B(G.x, 21, -8), { c: 'x', f: C.warn }) }),
+    bob(1.2) +
+    `.o{animation:O 2.4s steps(1) infinite}@keyframes O{40%{${ty(1)}}48%{opacity:.6;${ty(3)}}56%,100%{opacity:0}}` +
+    `.n{animation:N 2.4s steps(1) infinite}${reveal('N', 60, 100)}` +
+    `.r{animation:A 2.4s steps(1) infinite}@keyframes A{16%{${ty(-9)}}26%{${ty(-8)}}34%{${ty(-9)}}44%{transform:none}}` +
+    `.x{opacity:0;animation:X 2.4s steps(1) infinite}${reveal('X', 34, 42)}`);
+}
+
+// BROWSING (web search / fetch): surfing the web on a board, globe spinning
+{
+  let wave = '';
+  for (let x = -14; x < 34; x += 6) wave += R(x, 16, 4, 1);
+  const globe = flip([G.globe, G.globe2], 0.8, 24, -8, C.blue);
+  const spray = [[-6, 12, 0], [-5, 10, 0.3]].map(([x, y, d]) => P(R(x, y, 1, 1), { c: 'k', f: C.ink, s: d ? dl(d) : '' })).join('');
+  add('browsing', 'Surfing the web', 'Web search and fetch: rides the wave, globe spinning.',
+    globe.svg + P(wave, { c: 'v', f: C.blue }) + spray +
+    `<g class='q'>${crab({ eyes: 'happy', armY: 3 })}${P(R(-3, 15, 30, 1) + R(-4, 14, 1, 1) + R(27, 14, 1, 1), { f: C.warn })}</g>`,
+    globe.css +
+    `.v{animation:V .9s steps(3) infinite}@keyframes V{100%{${tx(-6)}}}` +
+    `.q{animation:Q 1.6s steps(1) infinite}@keyframes Q{25%{${ty(-1)}}50%{transform:none}75%{${ty(1)}}}` +
+    `.k{opacity:0;animation:K .9s steps(3) infinite}@keyframes K{0%{opacity:1}100%{opacity:0;transform:translate(-2px,-3px)}}`);
+}
+
+// PLANNING (todo list): ticks off a checklist on a clipboard
+{
+  let paper = P(R(7, 3, 10, 9), { f: C.ink }) + P(R(10, 2, 4, 2), { f: C.grey });
+  [4, 7, 10].forEach((y, i) => {
+    paper += P(R(8, y, 2, 2) + R(11, y, 5, 1), { f: '#999' }) + P(B(G.check, 8, y - 1), { c: `t t${i}`, f: C.ok });
+  });
+  add('planning', 'Making a plan', 'Todo list: ticks items off a clipboard one by one.',
+    crab({ eyes: 'down', armY: 8, front: paper }),
+    bob(2) + blink(3.6, 70) +
+    `.t{animation:T0 3s steps(1) infinite}.t1{animation-name:T1}.t2{animation-name:T2}` +
+    [15, 40, 65].map((on, i) => reveal(`T${i}`, on)).join(''));
+}
+
+// LISTENING (you are typing): looks down at your message, "…" bubble
+{
+  const bubble = P(R(14, -9, 9, 1) + R(13, -8, 11, 3) + R(14, -5, 9, 1) + R(14, -4, 2, 1) + R(14, -3, 1, 1), { f: C.ink });
+  const dots = [15, 18, 21].map((x, i) => P(R(x, -7, 1, 1), { c: 'd', f: C.eye, s: i ? dl(i * 0.2) : '' })).join('');
+  add('listening', 'Listening', 'You are typing: looks down at your message, nodding along.',
+    crab({ eyes: 'down', back: bubble + dots }),
+    bob(1.6) + blink(3, 80) +
+    `.d{animation:D 1.2s steps(1) infinite}@keyframes D{0%{${ty(-1)}}25%{transform:none}}`);
+}
+
 // ---------- emit ----------
 const svgFor = (s) =>
   `<svg xmlns='http://www.w3.org/2000/svg' viewBox='${s.vb}' shape-rendering='crispEdges'>` +
-  `<style>*{transform-box:fill-box}.f{fill:${C.fur}}${s.css}</style>${s.inner}</svg>`;
+  `<style>*{transform-box:fill-box}.f{fill:${C.fur}}${s.css}@media(prefers-reduced-motion:reduce){*{animation-play-state:paused!important}}</style>${s.inner}</svg>`;
 // Only # and % need escaping inside url("...") since the SVG uses single quotes throughout.
 const dataUri = (svg) => `data:image/svg+xml,${svg.replaceAll('%', '%25').replaceAll('#', '%23')}`;
 

@@ -78,6 +78,11 @@ test('only running or queued subagents get a mini crab', opts, () => {
   assert.deepEqual(results.cases['delegating (queued)'].subagents, [['Queued', 'subagent']]);
 });
 
+test('empty chat gets a mini crab walking on the message box, busy chats do not', opts, () => {
+  assert.equal(results.cases.idle.walker, 'subagent');
+  for (const [name, , rows] of CASES) if (/data-(timeline-row-kind|v2-item-type)/.test(rows)) assert.equal(results.cases[name].walker, null, name);
+});
+
 test('sidebar shows the right crab for each thread status', opts, () => {
   assert.deepEqual(results.sidebar, SIDEBAR.map(([, s]) => s));
 });

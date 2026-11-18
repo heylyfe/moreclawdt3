@@ -9,11 +9,18 @@
 :where(body){--cr:clawd-rest;--cn:var(--clawd-idle)}
 :where(body:has([data-timeline-row-kind=working],[data-sidebar-row][aria-current=page]:is([aria-label*=", Working"],[aria-label*=", Goal"],[aria-label*=", Setting up"]))){--cr:none;--cn:var(--clawd-working)}
 :where(body:has([data-timeline-row-kind=thinking],[data-timeline-row-kind=work-live] .lucide-brain)){--cr:none;--cn:var(--clawd-thinking)}
-:where(body:has([data-timeline-row-kind=work-live] :is(.lucide-eye,.lucide-search,.lucide-globe))){--cr:none;--cn:var(--clawd-reading)}
+:where(body:has([data-timeline-row-kind=work-live] .lucide-square-pen)){--cr:none;--cn:var(--clawd-editing)}
+:where(body:has([data-timeline-row-kind=work-live] .lucide-terminal)){--cr:none;--cn:var(--clawd-terminal)}
+:where(body:has([data-timeline-row-kind=work-live] .lucide-list-todo)){--cr:none;--cn:var(--clawd-planning)}
+:where(body:has([data-timeline-row-kind=work-live] :is(.lucide-eye,.lucide-search))){--cr:none;--cn:var(--clawd-reading)}
+:where(body:has([data-timeline-row-kind=work-live] .lucide-globe)){--cr:none;--cn:var(--clawd-browsing)}
 :where(body:has([data-v2-item-type=subagent]:is([aria-description=Running],[aria-description=Queued]),[data-timeline-row-kind=work-live] .lucide-bot)){--cr:none;--cn:var(--clawd-delegating)}
 :where(body:has([data-timeline-row-kind=working] .live-activity-focus)){--cr:none;--cn:var(--clawd-compacting)}
 :where(body:has([data-v2-item-type=approval_request],[data-pending-user-input-toggle],[data-sidebar-row][aria-current=page]:is([aria-label*=", Approval"],[aria-label*=", Input"],[aria-label*=", Waiting"],[aria-label*=", Request"]))){--cr:none;--cn:var(--clawd-waiting)}
 :where(body:has([data-sidebar-row][aria-current=page]:is([aria-label*=", Failed"],[aria-label*=", Limited"]))){--cr:none;--cn:var(--clawd-error)}
+
+/* While you type a message, Clawd listens (the placeholder is gone once there is text) */
+:where([data-chat-composer-form]:has(.composer-tiptap:focus):not(:has(.text-placeholder))){--cr:none;--cn:var(--clawd-listening)}
 
 [data-chat-composer-form]{position:relative}
 [data-chat-composer-form]::before{content:"";position:absolute;z-index:2;right:20px;bottom:calc(100% - 8px);width:99px;height:72px;pointer-events:none;background:var(--cn) center/contain no-repeat;
@@ -39,3 +46,10 @@
 :where([data-sidebar-row]:is([aria-label*=", Failed"],[aria-label*=", Limited"])){--cs:var(--clawd-error)}
 :where([data-sidebar-row][aria-label*=", Done"]){--cs:var(--clawd-done)}
 :where([data-sidebar-row][aria-label*=", Woke"]){--cs:var(--clawd-sleeping)}
+
+/* 4 ─ Empty chat: a mini crab scuttles along the top of the message box, towards big Clawd */
+[data-workspace-area=conversation]:not(:has([data-timeline-row-kind],[data-v2-item-type],[data-timeline-loading])) [data-chat-composer-form]::after{content:"";position:absolute;z-index:2;left:24px;bottom:calc(100% - 1px);width:27px;height:17px;pointer-events:none;background:var(--clawd-subagent) center/contain no-repeat;animation:clawd-scuttle 12s steps(48) infinite alternate}
+@keyframes clawd-scuttle{to{left:calc(100% - 160px)}}
+
+/* Reduced motion: the walking crab stands still (states still change) */
+@media (prefers-reduced-motion:reduce){[data-chat-composer-form]::after{animation:none}}

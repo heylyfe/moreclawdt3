@@ -16,7 +16,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const theme = JSON.parse(read('t3-clawd-crab.json'));
 export const STATES = ['idle', 'thinking', 'working', 'reading', 'delegating', 'subagent',
-  'waiting', 'error', 'done', 'sleeping', 'compacting'];
+  'waiting', 'error', 'done', 'sleeping', 'compacting', 'terminal', 'editing', 'browsing', 'planning', 'listening'];
 
 test('theme file matches the T3 Code theme schema', () => {
   assert.equal(theme.version, 1);
@@ -60,6 +60,10 @@ test('the mod uses every sprite it needs', () => {
   for (const id of STATES) assert.ok(theme.css.includes(`var(--clawd-${id})`), `var(--clawd-${id}) unused`);
 });
 
+test('listening only triggers on a focused composer with text in it', () => {
+  assert.ok(theme.css.includes('[data-chat-composer-form]:has(.composer-tiptap:focus):not(:has(.text-placeholder))'));
+});
+
 test('the original t3-clawd theme is kept as-is', () => {
   const base = JSON.parse(read('vendor/t3-clawd.json'));
   assert.ok(theme.css.startsWith(base.css.replaceAll('"\\2318N"', '"⌘N"')));
@@ -77,6 +81,7 @@ test('each SVG is small, self-contained and safe to embed', () => {
     assert.doesNotMatch(svg, /href|<script|<image|@import/i, 'no external references or scripts');
     assert.equal((svg.match(/<path/g) || []).length, (svg.match(/\/>/g) || []).length, 'paths are closed');
     assert.ok(svg.length < 4096, `${id} is ${svg.length} bytes`);
+    assert.ok(svg.includes('@media(prefers-reduced-motion:reduce)'), `${id} ignores reduced motion`);
   }
 });
 

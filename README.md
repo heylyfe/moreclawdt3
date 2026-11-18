@@ -12,20 +12,22 @@ Built on top of **[t3-clawd](https://github.com/rohit3a/t3-clawd) by [@rohit3a](
 | :---: | :---: | :---: | :---: |
 | <img src="clawd/clawd-idle.svg" width="144" alt="Idle"><br>**Idle**<br><sub>breathes, blinks</sub> | <img src="clawd/clawd-thinking.svg" width="144" alt="Thinking"><br>**Thinking**<br><sub>✻ spinner, eyes looking around</sub> | <img src="clawd/clawd-working.svg" width="144" alt="Working"><br>**Working**<br><sub>hammers the keyboard, code flies out</sub> | <img src="clawd/clawd-reading.svg" width="144" alt="Reading"><br>**Reading**<br><sub>magnifier sweeps the files</sub> |
 | <img src="clawd/clawd-delegating.svg" width="144" alt="Delegating"><br>**Delegating**<br><sub>flings out mini subagent crabs</sub> | <img src="clawd/clawd-subagent.svg" width="144" alt="Subagent"><br>**Subagent**<br><sub>a mini crab, scuttling</sub> | <img src="clawd/clawd-waiting.svg" width="144" alt="Waiting"><br>**Waiting**<br><sub>waves, holds up a “?”</sub> | <img src="clawd/clawd-error.svg" width="144" alt="Error"><br>**Error**<br><sub>flashes red, X eyes, sweats</sub> |
-| <img src="clawd/clawd-done.svg" width="144" alt="Done"><br>**Done**<br><sub>happy hop, sparkles</sub> | <img src="clawd/clawd-sleeping.svg" width="144" alt="Sleeping"><br>**Sleeping**<br><sub>tucked legs, Zzz</sub> | <img src="clawd/clawd-compacting.svg" width="144" alt="Compacting"><br>**Compacting**<br><sub>squeezes the conversation</sub> | |
+| <img src="clawd/clawd-done.svg" width="144" alt="Done"><br>**Done**<br><sub>happy hop, sparkles</sub> | <img src="clawd/clawd-sleeping.svg" width="144" alt="Sleeping"><br>**Sleeping**<br><sub>tucked legs, Zzz</sub> | <img src="clawd/clawd-compacting.svg" width="144" alt="Compacting"><br>**Compacting**<br><sub>squeezes the conversation</sub> | <img src="clawd/clawd-terminal.svg" width="144" alt="Terminal"><br>**Terminal**<br><sub>types a command, output scrolls in</sub> |
+| <img src="clawd/clawd-editing.svg" width="144" alt="Editing"><br>**Editing**<br><sub>snips the old line, a green one grows</sub> | <img src="clawd/clawd-browsing.svg" width="144" alt="Browsing"><br>**Browsing**<br><sub>surfs the web, globe spinning</sub> | <img src="clawd/clawd-planning.svg" width="144" alt="Planning"><br>**Planning**<br><sub>ticks off a checklist</sub> | <img src="clawd/clawd-listening.svg" width="144" alt="Listening"><br>**Listening**<br><sub>watches you type, “…” bubble</sub> |
 
-Every sprite is a single SVG file between 0.6 and 2.3 KB. The animation is CSS inside the SVG, so there are no GIFs and no JavaScript. For a closer look, download [`clawd-gallery.html`](clawd-gallery.html) and open it in a browser. It shows each state next to a Claude Code-style status line.
+There are 16 crabs. Each one is a single SVG file between 0.7 and 2.4 KB. The animation is CSS inside the SVG, so there are no GIFs and no JavaScript. If your system is set to reduce motion, every crab holds still on its first frame. For a closer look, download [`clawd-gallery.html`](clawd-gallery.html) and open it in a browser. It shows each state next to a Claude Code-style status line.
 
 ## Where they show up
 
-- **On the message box:** a big Clawd stands on top of the chat input and follows the open thread. It types while the agent works, thinks while it reasons, reads during file reads and searches, and deploys mini crabs while subagents run. It waves for approvals, sweats on errors, celebrates when a turn ends, and eventually falls asleep.
+- **On the message box:** a big Clawd stands on top of the chat input and follows the open thread. It types while the agent works and thinks while it reasons. It reads during file reads and code searches, runs commands in a tiny terminal, snips code during edits, surfs during web searches, ticks off a checklist when the agent plans, and deploys mini crabs while subagents run. While you type a message, it watches you type. It waves for approvals, sweats on errors, celebrates when a turn ends, and eventually falls asleep.
 - **Beside "Working for 12s":** a small typing crab, which switches to a squishing crab while the context is compacted.
 - **Beside each running subagent:** a scuttling mini crab.
+- **In an empty chat:** a mini crab walks back and forth along the top of the message box, towards the big Clawd.
 - **In the sidebar:** each thread gets a crab for its status (working, waiting, error, done or asleep). It hides when you hover the row so the buttons stay clickable.
 
 ## How to install
 
-You need **T3 Code nightly from 14 Nov 2026 or later**. Earlier versions cap theme CSS at 20,000 characters, and this theme uses about 37,600 (the current nightly allows 100,000).
+You need **T3 Code nightly from 14 Nov 2026 or later**. Earlier versions cap theme CSS at 20,000 characters, and this theme uses about 47,300 (the current nightly allows 100,000).
 
 ### Option A: in the app (easiest)
 
@@ -48,7 +50,7 @@ To update, download the new `t3-clawd-crab.json` and add it the same way. It rep
 
 ### Only want the sprites?
 
-[`clawd/clawd-theme.css`](clawd/clawd-theme.css) contains just the 11 sprites as CSS variables (`--clawd-working` and the rest), so you can use them in your own theme:
+[`clawd/clawd-theme.css`](clawd/clawd-theme.css) contains just the 16 sprites as CSS variables (`--clawd-working` and the rest), so you can use them in your own theme:
 
 ```css
 .my-thing { background: var(--clawd-working) center / contain no-repeat; }
@@ -77,13 +79,13 @@ Want a bigger crab? Change the `width`/`height` in `mod.template.css` (keep the 
 
 ## Tests
 
-`npm test` runs 31 checks with Node's built-in test runner. There's nothing to install.
+`npm test` runs 40 checks with Node's built-in test runner. There's nothing to install.
 
 - **Theme file:** matches T3 Code's theme schema (name, colors, the 100k CSS limit), using rules copied from T3 Code's source.
 - **No stripped styles:** T3 Code's own fetch filter (copied into `test/t3/`) accepts every sprite, and the CSS loads no remote files.
 - **SVGs:** each one is self-contained, with no scripts and no external links, and safe to embed.
 - **Build is current:** a fresh build matches the committed files exactly.
-- **Real browser:** a headless Chrome or Edge loads a fake T3 Code DOM, applies the theme with T3 Code's own loader, and checks which crab appears for 19 situations. It covers every sidebar status and the subagent and "Working…" rows. This test is skipped if no Chrome or Edge is found (set `CHROME_PATH` to point at one).
+- **Real browser:** a headless Chrome or Edge loads a fake T3 Code DOM, applies the theme with T3 Code's own loader, and checks which crab appears in 26 situations. It covers every tool, typing a message, empty chats, every sidebar status, and the subagent and "Working…" rows. This test is skipped if no Chrome or Edge is found (set `CHROME_PATH` to point at one).
 
 GitHub Actions runs the same tests on every push.
 
@@ -93,13 +95,14 @@ T3 Code themes are CSS only and cannot load files. So:
 
 - Every sprite is inlined as a `data:` URI in a CSS variable. Inlining is allowed, and each sprite costs about 1 KB.
 - The CSS reads state from attributes T3 Code already renders. Examples are `data-timeline-row-kind="working"`, `data-v2-item-type="subagent"`, `aria-description="Running"`, the sidebar's `aria-label="Title, Waiting, Project"`, and the lucide icon of the tool running right now.
-- `body:has(...)` rules set `--cn` (the current crab). They're wrapped in `:where()`, so later, more urgent states win: idle → working → thinking → reading → delegating → compacting → waiting → error.
+- `body:has(...)` rules set `--cn` (the current crab). They're wrapped in `:where()`, so later, more urgent states win: idle → working → thinking → editing / terminal / planning / reading / browsing → delegating → compacting → waiting → error. Typing a message overrides all of them.
 - When nothing is happening, a 150-second CSS animation shows a short celebration, then idle, then sleep.
 
 ### Known limits
 
 - Only the stable hooks T3 Code documents are guaranteed. The others (the tool icons, the `live-*` classes, the sidebar status words) may change in a T3 Code update. If they do, `npm test` still passes but the crab may fall back to idle. Please open an issue if that happens.
 - The sidebar status matching uses English status words.
+- Listening detects text in the message box by the absence of its placeholder (`.text-placeholder`). If that class is renamed, Clawd listens whenever the box is focused.
 - Works on web and desktop. T3 Code mobile doesn't use themes.
 
 ## Credits

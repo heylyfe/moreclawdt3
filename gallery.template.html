@@ -100,6 +100,23 @@ function status(id){
      <span class="a">▪</span> perf-probe     <span class="g">Completed</span>
 <span class="a">${g} Herding crabs…</span> <span class="d">(${s}s · esc to interrupt)</span>`;
     case "subagent": return `<span class="d">  ⎿</span>  <span class="a">auth-tests</span> · Running <span class="d">· reading src/auth/*.ts</span>`;
+    case "terminal": return `<span class="a">⏺</span> Bash(<b>npm run test:claws</b>)
+  <span class="d">⎿</span>  <span class="g">✓ 48 passed</span> <span class="d">(1.2s)</span>
+<span class="a">${g} Shell-scripting…</span> <span class="d">(${s}s · esc to interrupt)</span>`;
+    case "editing": return `<span class="a">⏺</span> Update(<b>src/claws.ts</b>)
+  <span class="d">⎿</span>  <span class="e">- const grip = pinch(claw)</span>
+     <span class="g">+ const grip = pinch(claw, { gentle: true })</span>`;
+    case "browsing": return `<span class="a">⏺</span> Web Search("<b>tide tables api rate limits</b>")
+  <span class="d">⎿</span>  Did 1 search in ${(1.4 + s * 0.1).toFixed(1)}s
+<span class="a">${g} Surfing…</span> <span class="d">(${s}s · esc to interrupt)</span>`;
+    case "planning": return `<span class="a">⏺</span> Update Todos
+  <span class="d">⎿</span>  <span class="g">☒ Find the flaky pinch test</span>
+     <span class="g">☒ Debounce the claw handler</span>
+     ☐ Molt the old shell API`;
+    case "listening": return `<span class="d">╭──────────────────────────────────────╮
+│</span> &gt; can you make the crab dance when tests pass█
+<span class="d">╰──────────────────────────────────────╯
+  Clawd is listening…</span>`;
     case "compacting": return `<span class="a">${g} Compacting conversation…</span> <span class="d">(${s}s)</span>
 <span class="d">  ⎿  Squeezing 182k tokens into a shell-sized summary</span>`;
   }

@@ -13,7 +13,7 @@ const working = (t = 'Working for 12s') => `<div data-timeline-row-kind="working
 const tool = (icon, label) => `<div data-timeline-row-kind="work-live"><svg class="lucide lucide-${icon}" width="12" height="12"></svg> <span class="live-tool-shine">${label}</span></div>`;
 const subagent = (name, status) => `<div data-v2-item-type="subagent" aria-description="${status}" style="display:flex;gap:6px;align-items:center">${name} · ${status}</div>`;
 
-// [name, open thread's sidebar status, timeline rows, expected mascot sprite]
+// [name, open thread's sidebar status, timeline rows, expected mascot sprite, { typed, focus } for the composer]
 export const CASES = [
   ['idle', 'Done', '', 'idle'],
   ['working', 'Working', working(), 'working'],
@@ -22,8 +22,15 @@ export const CASES = [
   ['thinking (brain tool)', 'Working', tool('brain', 'Reasoning') + working(), 'thinking'],
   ['reading', 'Working', tool('eye', 'Read README.md') + working('Working for 8s'), 'reading'],
   ['searching code', 'Working', tool('search', 'Search "molt"') + working(), 'reading'],
-  ['web search', 'Working', tool('globe', 'Search the web') + working(), 'reading'],
-  ['editing', 'Working', tool('square-pen', 'Edit claws.ts') + working(), 'working'],
+  ['web search', 'Working', tool('globe', 'Search the web') + working(), 'browsing'],
+  ['editing', 'Working', tool('square-pen', 'Edit claws.ts') + working(), 'editing'],
+  ['terminal', 'Working', tool('terminal', 'npm test') + working(), 'terminal'],
+  ['planning', 'Working', tool('list-todo', 'Update todos') + working(), 'planning'],
+  ['other tool', 'Working', tool('wrench', 'Some MCP tool') + working(), 'working'],
+  ['typing a message', 'Done', '<div data-timeline-row-kind="message">hi</div>', 'listening', { typed: true, focus: true }],
+  ['typing while it works', 'Working', working(), 'listening', { typed: true, focus: true }],
+  ['composer focused but empty', 'Done', '<div data-timeline-row-kind="message">hi</div>', 'idle', { focus: true }],
+  ['text left in an unfocused composer', 'Done', '<div data-timeline-row-kind="message">hi</div>', 'idle', { typed: true }],
   ['compacting', 'Working', `<div data-timeline-row-kind="working"><div><span>Compacting… <span class="live-activity-focus"></span></span></div></div>`, 'compacting'],
   ['delegating', 'Working', subagent('auth-tests', 'Running') + subagent('perf-probe', 'Completed') + working('Working for 20s'), 'delegating'],
   ['delegating (queued)', 'Working', subagent('docs-sweep', 'Queued') + working(), 'delegating'],
@@ -44,7 +51,7 @@ export const SIDEBAR = [
 ];
 
 export const STATE_IDS = ['idle', 'thinking', 'working', 'reading', 'delegating', 'subagent',
-  'waiting', 'error', 'done', 'sleeping', 'compacting'];
+  'waiting', 'error', 'done', 'sleeping', 'compacting', 'terminal', 'editing', 'browsing', 'planning', 'listening'];
 
 const themeCss = () => JSON.parse(fs.readFileSync(path.join(ROOT, 't3-clawd-crab.json'), 'utf8')).css;
 const loader = () => fs.readFileSync(path.join(HERE, 't3', 'loader.js'), 'utf8');
@@ -58,9 +65,11 @@ form{border:1px solid #444;border-radius:8px;padding:10px;margin-top:40px}`;
 const sidebarRow = (title, status, current) =>
   `<li data-thread-item><button data-sidebar-row${current ? ' aria-current="page"' : ''} aria-label="${title}, ${status}, app">${title}</button></li>`;
 
-export function appBody(status, rows, extraSidebar = []) {
+export function appBody(status, rows, extraSidebar = [], { typed = false } = {}) {
+  const editor = `<div class="composer-tiptap" contenteditable="true">${typed ? 'make the crab dance' : ''}</div>` +
+    (typed ? '' : '<div class="pointer-events-none text-placeholder">Ask Clawd anything…</div>');
   return `<div data-slot="sidebar"><ul>${sidebarRow('Fix auth', status, true)}${extraSidebar.join('')}</ul></div>
-<main><div class="messages-timeline-scroll">${rows}</div><form data-chat-composer-form><div data-slot="composer-host">Ask Clawd anything…</div></form></main>`;
+<main data-workspace-area="conversation"><div class="messages-timeline-scroll">${rows}</div><form data-chat-composer-form><div data-slot="composer-host">${editor}</div></form></main>`;
 }
 
 function themeScript(css) {
@@ -70,8 +79,10 @@ function themeScript(css) {
 
 /** One page that swaps each case into the body and records which sprite shows where. */
 export function buildTestPage() {
-  const css = themeCss();
-  const cases = JSON.stringify(CASES.map(([name, status, rows]) => ({ name, body: appBody(status, rows) })));
+  // Headless browsers never give the page focus, so :focus cannot match there. Swap it for an
+  // attribute the test sets; theme.test.mjs checks that the real rule uses :focus.
+  const css = themeCss().replaceAll('.composer-tiptap:focus', '.composer-tiptap[data-test-focus]');
+  const cases = JSON.stringify(CASES.map(([name, status, rows, , o = {}]) => ({ name, focus: !!o.focus, body: appBody(status, rows, [], o) })));
   const sidebar = JSON.stringify(SIDEBAR.map(([status], i) => sidebarRow(`Thread ${i}`, status, false)));
   return `<!doctype html><html class="dark"><head><meta charset="utf-8"><style>${BASE_STYLE}</style>${themeScript(css)}</head>
 <body><script>${loader()}</script><script>
@@ -88,14 +99,16 @@ const bg = (el, pseudo) => { const b = getComputedStyle(el, pseudo).backgroundIm
 const out = { stripped: window.__stripped, rules: document.adoptedStyleSheets[0].cssRules.length, spritesFound: Object.keys(sprite).length, cases: {} };
 for (const c of CASES) {
   document.body.innerHTML = c.body;
+  if (c.focus) document.querySelector('.composer-tiptap').setAttribute('data-test-focus', '');
   const form = document.querySelector('[data-chat-composer-form]');
   const before = getComputedStyle(form, '::before');
   out.cases[c.name] = {
-    cn: value[getComputedStyle(document.body).getPropertyValue('--cn').trim()] ?? 'unknown',
+    cn: value[getComputedStyle(form).getPropertyValue('--cn').trim()] ?? 'unknown',
     mascot: bg(form, '::before'),
     mascotAnimation: before.animationName,
     mascotSize: before.width + '×' + before.height,
     workingRow: [...document.querySelectorAll('[data-timeline-row-kind=working]')].map((r) => bg(r, '::before')),
+    walker: bg(form, '::after'),
     subagents: [...document.querySelectorAll('[data-v2-item-type=subagent]')].map((r) => [r.getAttribute('aria-description'), bg(r, '::before')]),
   };
 }
@@ -111,11 +124,11 @@ function appBody(status, rows, extra = []) { return ${JSON.stringify(appBody('%S
 export function buildPreviewPage() {
   const css = themeCss();
   const extra = SIDEBAR.slice(0, 4).map(([status], i) => sidebarRow(['Molt shell', 'Pinch test', 'Sand docs', 'Tide pool'][i], status, false));
-  const frame = (status, rows) => `<!doctype html><html class="dark"><head><meta charset="utf-8"><style>${BASE_STYLE}</style>${themeScript(css)}</head><body>${appBody(status, rows, extra)}<script>${loader()}</script></body></html>`;
+  const frame = (status, rows, o) => `<!doctype html><html class="dark"><head><meta charset="utf-8"><style>${BASE_STYLE}</style>${themeScript(css)}</head><body>${appBody(status, rows, extra, o)}<script>${o?.focus ? "addEventListener('load',()=>document.querySelector('.composer-tiptap').focus())" : ''}</script><script>${loader()}</script></body></html>`;
   const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
   return `<!doctype html><html><head><meta charset="utf-8"><title>Clawd Crab mock preview</title></head>
 <body style="margin:0;background:#111;color:#aaa;font:12px monospace;display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:6px;padding:6px">
-${CASES.map(([name, status, rows]) => `<div><div>${name}</div><iframe style="width:100%;height:230px;border:1px solid #333" srcdoc="${esc(frame(status, rows))}"></iframe></div>`).join('\n')}
+${CASES.map(([name, status, rows, , o]) => `<div><div>${name}</div><iframe style="width:100%;height:230px;border:1px solid #333" srcdoc="${esc(frame(status, rows, o))}"></iframe></div>`).join('\n')}
 </body></html>`;
 }
 
